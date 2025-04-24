@@ -152,10 +152,10 @@ spec:
 {{- end }}
 
 {{ if .Values.customFlow }}
-          gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.xml.gz
+          gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.json.gz
 {{ else }}
-          if ! test -f /opt/nifi/data/flow.xml.gz && test -f /opt/nifi/data/flow.xml; then
-            gzip /opt/nifi/data/flow.xml
+          if ! test -f /opt/nifi/data/flow.json.gz && test -f /opt/nifi/data/flow.json; then
+            gzip /opt/nifi/data/flow.json
           fi
 {{ end }}
 
@@ -194,21 +194,7 @@ spec:
             echo "${NIFI_HOME}/tls/keystore.jks" is not readable!  Waiting for cert-manager sidecar to populate it.
             sleep 2
           done
-
-{{- /* if .Values.certManager.enabled */}}{{ else }}
-
-          if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
-          then
-            /opt/nifi/nifi-toolkit-current/bin/tls-toolkit.sh standalone \
-              -n '{{.Release.Name}}-nifi-0.{{.Release.Name}}-nifi-headless.{{.Release.Namespace}}.svc.cluster.local' \
-              -C '{{.Values.auth.admin}}' \
-              -o "${NIFI_HOME}/conf/" \
-              -P {{.Values.auth.SSL.truststorePasswd}} \
-              -S {{.Values.auth.SSL.keystorePasswd}} \
-              --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
-          fi
-
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{ end }}
 
 {{- if .Values.properties.safetyValve }}
   {{- range $prop, $val := .Values.properties.safetyValve }}
@@ -448,6 +434,20 @@ spec:
             {{- else }}
             name: "provenance-repository"
             {{- end }}
+          - mountPath: /opt/nifi/status_repository
+            {{- if and .Values.persistence.enabled .Values.persistence.subPath.enabled }}
+            name: {{ .Values.persistence.subPath.name }}
+            subPath: status-repository
+            {{- else }}
+            name: "status-repository"
+            {{- end }}
+          - mountPath: /opt/nifi/nar_repository
+            {{- if and .Values.persistence.enabled .Values.persistence.subPath.enabled }}
+            name: {{ .Values.persistence.subPath.name }}
+            subPath: nar-repository
+            {{- else }}
+            name: "nar-repository"
+            {{- end }}
           - name: "bootstrap-conf"
             mountPath: /opt/nifi/nifi-current/conf/bootstrap.conf
             subPath: "bootstrap.conf"
@@ -457,9 +457,6 @@ spec:
           - name: "authorizers-xml"
             mountPath: /opt/nifi/nifi-current/conf/authorizers.xml.temp
             subPath: "authorizers.xml"
-          - name: "bootstrap-notification-services-xml"
-            mountPath: /opt/nifi/nifi-current/conf/bootstrap-notification-services.xml
-            subPath: "bootstrap-notification-services.xml"
           - name: "login-identity-providers-custom-xml"
             mountPath: /opt/nifi/nifi-current/conf/login-identity-providers-custom.xml
             subPath: "login-identity-providers-custom.xml"
@@ -473,8 +470,8 @@ spec:
             mountPath: /opt/nifi/nifi-current/conf/logback.xml
             subPath: "logback.xml"
           - name: "flow-content"
-            mountPath: /opt/nifi/data/flow.xml
-            subPath: "flow.xml"
+            mountPath: /opt/nifi/data/flow.json
+            subPath: "flow.json"
           {{- range $secret := .Values.secrets }}
             {{- if $secret.mountPath }}
               {{- if $secret.keys }}
@@ -716,12 +713,6 @@ spec:
           items:
             - key: "authorizers.xml"
               path: "authorizers.xml"
-      - name: "bootstrap-notification-services-xml"
-        configMap:
-          name: {{ template "apache-nifi.fullname" . }}-config
-          items:
-            - key: "bootstrap-notification-services.xml"
-              path: "bootstrap-notification-services.xml"
       - name: "login-identity-providers-custom-xml"
         configMap:
           name: {{ template "apache-nifi.fullname" . }}-config
@@ -750,8 +741,8 @@ spec:
         configMap:
           name: {{ template "apache-nifi.fullname" . }}-config
           items:
-            - key: "flow.xml"
-              path: "flow.xml"
+            - key: "flow.json"
+              path: "flow.json"
 {{- if .Values.certManager.enabled }}
       - name: secret-reader-token
         secret:
@@ -786,6 +777,10 @@ spec:
       - name: content-repository
         emptyDir: {}
       - name: provenance-repository
+        emptyDir: {}
+      - name: status-repository
+        emptyDir: {}
+      - name: nar-repository
         emptyDir: {}
       - name: logs
         emptyDir: {}
@@ -872,6 +867,52 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.provenanceRepoStorage.size }}
+
+
+
+
+
+
+
+    - metadata:
+        name: status-repository
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.StatusRepoStorage.size }}
+    - metadata:
+        name: nar-repository
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.NarRepoStorage.size }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     - metadata:
         name: auth-conf
       spec:

@@ -37,12 +37,15 @@ secrets:
   mountPath: /opt/nifi/nifi-current/config-data/certs/
 ```
 
+<!---
+# TODO: Validate values
 Enable the Nifi server to prompt for client certificates:
 
 ```
 properties:
    needClientAuth: true
 ```
+-->
 
 Indicate Client Authentication mode configurations should be applied and set SSL values:
 

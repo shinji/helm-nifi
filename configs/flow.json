@@ -1,0 +1,59 @@
+{
+  "encodingVersion": {
+    "majorVersion": 2,
+    "minorVersion": 0
+  },
+  "maxTimerDrivenThreadCount": 10,
+  "registries": [
+    {
+      "identifier": "{{ template "registry.identifier" }}",
+      "instanceIdentifier": "{{ template "registry.identifier" }}",
+      "name": "default",
+      "type": "org.apache.nifi.registry.flow.NifiRegistryFlowRegistryClient",
+      "bundle": {
+        "group": "org.apache.nifi",
+        "artifact": "nifi-flow-registry-client-nar",
+        "version": "2.3.0"
+      },
+      "properties": {
+        "url": "{{ template "registry.url" . }}"
+      },
+      "propertyDescriptors": {},
+      "componentType": "FLOW_REGISTRY_CLIENT"
+    }
+  ],
+  "parameterContexts": [],
+  "parameterProviders": [],
+  "controllerServices": [],
+  "reportingTasks": [],
+  "flowAnalysisRules": [],
+  "rootGroup": {
+    "identifier": "{{ template "rootGroup.identifier" }}",
+    "instanceIdentifier": "1",
+    "name": "NiFi Flow",
+    "comments": "",
+    "position": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "processGroups": [],
+    "remoteProcessGroups": [],
+    "processors": [],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP"
+  }
+}

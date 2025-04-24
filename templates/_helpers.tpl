@@ -70,14 +70,17 @@ else use user-provided name and port
 {{- end -}}
 
 {{/*
-Create ca.server
+Form the Nifi Registry identifier and instanceIdentifier.
 */}}
-{{- define "ca.server" }}
-{{- if .Values.ca.enabled -}}
-{{- printf "%s-ca" .Release.Name }}
-{{- else -}}
-{{- printf "%s" .Values.ca.server }}
+{{- define "registry.identifier" }}
+{{- printf "%s" uuidv4 -}}
 {{- end -}}
+
+{{/*
+Form the rootGroup identifier.
+*/}}
+{{- define "rootGroup.identifier" }}
+{{- printf "%s" uuidv4 -}}
 {{- end -}}
 
 {{/*
