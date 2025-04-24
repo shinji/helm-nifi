@@ -11,4 +11,26 @@ metadata:
   annotations:
     checksum/config: {{ (.Files.Glob "configs/*").AsConfig | sha256sum | quote }}
 data:
-{{ (tpl (.Files.Glob "configs/*").AsConfig . ) | indent 2 }}
+  authorizers.xml: |-
+    {{- tpl ($.Files.Get "configs/authorizers.xml") . | nindent 4 }}
+
+  bootstrap.conf: |-
+    {{- tpl ($.Files.Get "configs/bootstrap.conf") . | nindent 4 }}
+
+  flow.json: |-
+    {{- tpl ($.Files.Get "configs/flow.json") . | nindent 4 }}
+
+  logback.xml: |-
+    {{- tpl ($.Files.Get "configs/logback.xml") . | nindent 4 }}
+
+  login-identity-providers-custom.xml: |-
+    {{- tpl ($.Files.Get "configs/login-identity-providers-custom.xml") . | nindent 4 }}
+
+  nifi.properties: |-
+    {{- tpl ($.Files.Get "configs/nifi.properties") . | nindent 4 }}
+
+  state-management.xml: |-
+    {{- tpl ($.Files.Get "configs/state-management.xml") . | nindent 4 }}
+
+  zookeeper.properties: |-
+    {{- tpl ($.Files.Get "configs/zookeeper.properties") . | nindent 4 }}
